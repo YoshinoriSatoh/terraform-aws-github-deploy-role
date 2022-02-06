@@ -85,7 +85,7 @@ resource "aws_iam_policy" "github_deployment" {
         Action: [
           "iam:PassRole"
         ],
-        Resource: length(var.roles_for_pass_role_arn) > 0 ? "${var.roles_for_pass_role_arns}" : null
+        Resource: length(var.roles_for_pass_role_arns) > 0 ? "${var.roles_for_pass_role_arns}" : null
       },
       {
         Sid: "DeployService",
