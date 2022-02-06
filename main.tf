@@ -14,19 +14,19 @@ resource "aws_iam_openid_connect_provider" "github_deployment" {
 }
 
 resource "aws_iam_role" "github_deployment" {
-  name = "github_deployment_${var.tf.env}"
+  name = "${var.tf.fullname}-github-deployment"
   assume_role_policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
+    "Version": "2012-10-17",
+    "Statement": [
       {
-        "Action" : "sts:AssumeRoleWithWebIdentity",
-        "Principal" : {
-          "Federated" : "${aws_iam_openid_connect_provider.github_deployment.arn}"
+        "Action": "sts:AssumeRoleWithWebIdentity",
+        "Principal": {
+          "Federated": "${aws_iam_openid_connect_provider.github_deployment.arn}"
         },
-        "Effect" : "Allow",
-        "Condition" : {
-          "StringLike" : {
-            "token.actions.githubusercontent.com:sub" : "repo:${var.github.organization}/*"
+        "Effect": "Allow",
+        "Condition": {
+          "StringLike": {
+            "token.actions.githubusercontent.com:sub": "repo:${var.github.organization}/*"
           }
         }
       }
@@ -40,20 +40,20 @@ resource "aws_iam_role_policy_attachment" "github_deployment" {
 }
 
 resource "aws_iam_policy" "github_deployment" {
-  name = "github_deployment_${var.tf.env}"
+  name = "${var.tf.fullname}-github-deployment"
 
   policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
+    Version: "2012-10-17",
+    Statement: [
       {
-        "Effect" : "Allow",
-        "Action" : [
+        Effect: "Allow",
+        Action: [
           "sts:GetCallerIdentity"
         ],
-        "Resource" : ["*"]
+        Resource: ["*"]
       },
       {
-        "Action" : [
+        Action: [
           "ecr:GetAuthorizationToken",
           "ecr:InitiateLayerUpload",
           "ecr:UploadLayerPart",
@@ -66,35 +66,35 @@ resource "aws_iam_policy" "github_deployment" {
           "ecr:GetDownloadUrlForLayer",
           "ecr:ListImages"
         ],
-        "Effect" : "Allow",
-        "Resource" : [
+        Effect: "Allow",
+        Resource: [
           "*"
         ]
       },
       {
-        "Sid" : "RegisterTaskDefinition",
-        "Effect" : "Allow",
-        "Action" : [
+        Sid: "RegisterTaskDefinition",
+        ffect: "Allow",
+        Action: [
           "ecs:RegisterTaskDefinition"
         ],
-        "Resource" : "*"
+        Resource: "*"
       },
       {
-        "Sid" : "PassRolesInTaskDefinition",
-        "Effect" : "Allow",
-        "Action" : [
+        Sid: "PassRolesInTaskDefinition",
+        Effect: "Allow",
+        Action: [
           "iam:PassRole"
         ],
-        "Resource" : "${var.roles_for_pass_role_arns}"
+        Resource: length(var.roles_for_pass_role_arn) > 0 ? "${var.roles_for_pass_role_arns}" : null
       },
       {
-        "Sid" : "DeployService",
-        "Effect" : "Allow",
-        "Action" : [
+        Sid: "DeployService",
+        Effect: "Allow",
+        Action: [
           "ecs:UpdateService",
           "ecs:DescribeServices"
         ],
-        "Resource" : "${var.ecs_service_arns}"
+        Resource: length(var.ecs_service_arns) > 0 ? "${var.ecs_service_arns}" : null
       }
     ]
   })
