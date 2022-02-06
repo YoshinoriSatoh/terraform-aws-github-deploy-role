@@ -85,7 +85,7 @@ resource "aws_iam_policy" "github_deployment" {
         Action: [
           "iam:PassRole"
         ],
-        Resource: length(var.roles_for_pass_role_arns) > 0 ? "${var.roles_for_pass_role_arns}" : []
+        Resource: length(var.roles_for_pass_role_arns) > 0 ? "${var.roles_for_pass_role_arns}" : "dummy"
       },
       {
         Sid: "DeployService",
@@ -94,7 +94,7 @@ resource "aws_iam_policy" "github_deployment" {
           "ecs:UpdateService",
           "ecs:DescribeServices"
         ],
-        Resource: length(var.ecs_service_arns) > 0 ? "${var.ecs_service_arns}" : []
+        Resource: length(var.ecs_service_arns) > 0 ? "${var.ecs_service_arns}" : "dummy"
       }
     ]
   })
