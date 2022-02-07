@@ -34,13 +34,8 @@ resource "aws_iam_role" "github_deployment" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "github_deployment" {
-  role       = aws_iam_role.github_deployment.name
-  policy_arn = aws_iam_policy.github_deployment.arn
-}
-
-resource "aws_iam_policy" "github_deployment" {
-  name = "${var.tf.fullname}-github-deployment"
+resource "aws_iam_policy" "all_resources" {
+  name = "${var.tf.fullname}-github-deployment-all-resources"
 
   policy = jsonencode({
     Version: "2012-10-17",
@@ -78,24 +73,61 @@ resource "aws_iam_policy" "github_deployment" {
           "ecs:RegisterTaskDefinition"
         ],
         Resource: "*"
-      },
-      {
+      }
+   ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "all_resources" {
+  role       = aws_iam_role.github_deployment.name
+  policy_arn = aws_iam_policy.all_resources.arn
+}
+
+resource "aws_iam_policy" "passrole" {
+  count = var.roles_for_pass_role_arns > 0 ? 1 : 0
+  name = "${var.tf.fullname}-github-deployment-passrole"
+  policy = jsonencode({
+    Version: "2012-10-17",
+    Statement: [
+     {
         Sid: "PassRolesInTaskDefinition",
         Effect: "Allow",
         Action: [
           "iam:PassRole"
         ],
-        Resource: length(var.roles_for_pass_role_arns) > 0 ? var.roles_for_pass_role_arns : [""]
-      },
-      {
+        Resource: var.roles_for_pass_role_arns
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "passrole" {
+  count = var.roles_for_pass_role_arns > 0 ? 1 : 0
+  role       = aws_iam_role.github_deployment.name
+  policy_arn = aws_iam_policy.passrole[0].arn
+}
+
+resource "aws_iam_policy" "ecs" {
+  count = var.ecs_service_arns > 0 ? 1 : 0
+  name = "${var.tf.fullname}-github-deployment-ecs"
+  policy = jsonencode({
+    Version: "2012-10-17",
+    Statement: [
+     {
         Sid: "DeployService",
         Effect: "Allow",
         Action: [
           "ecs:UpdateService",
           "ecs:DescribeServices"
         ],
-        Resource: length(var.ecs_service_arns) > 0 ? var.ecs_service_arns : [""]
+        Resource: var.ecs_service_arns
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs" {
+  count = var.ecs_service_arns > 0 ? 1 : 0
+  role       = aws_iam_role.github_deployment.name
+  policy_arn = aws_iam_policy.ecs[0].arn
 }
