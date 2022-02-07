@@ -45,9 +45,10 @@ resource "aws_iam_policy" "all_resources" {
         Action: [
           "sts:GetCallerIdentity"
         ],
-        Resource: ["*"]
+        Resource: "*"
       },
       {
+        Effect: "Allow",
         Action: [
           "ecr:GetAuthorizationToken",
           "ecr:InitiateLayerUpload",
@@ -61,20 +62,16 @@ resource "aws_iam_policy" "all_resources" {
           "ecr:GetDownloadUrlForLayer",
           "ecr:ListImages"
         ],
-        Effect: "Allow",
-        Resource: [
-          "*"
-        ]
+        Resource: "*"
       },
       {
-        Sid: "RegisterTaskDefinition",
-        ffect: "Allow",
+        Effect: "Allow",
         Action: [
           "ecs:RegisterTaskDefinition"
         ],
         Resource: "*"
       }
-   ]
+    ]
   })
 }
 
@@ -90,7 +87,6 @@ resource "aws_iam_policy" "passrole" {
     Version: "2012-10-17",
     Statement: [
      {
-        Sid: "PassRolesInTaskDefinition",
         Effect: "Allow",
         Action: [
           "iam:PassRole"
@@ -114,7 +110,6 @@ resource "aws_iam_policy" "ecs" {
     Version: "2012-10-17",
     Statement: [
      {
-        Sid: "DeployService",
         Effect: "Allow",
         Action: [
           "ecs:UpdateService",
